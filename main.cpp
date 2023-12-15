@@ -1,150 +1,28 @@
-#include <thread>
 #include <iostream>
-#include <mutex>
-#include <chrono>
-#include "raylib/raylib/src/raylib.h"
+#include "Ball.h"
+#include "Paddle.h"
 
 #define SCREEN_W 1280
-#define SCREEN_H 800
+#define SCREEN_H 720
 
 using namespace std;
 
-// globals
-typedef enum GameScreen
-{
-    TITLE = 0,
-    RULES,
-    GAMEPLAY,
-    GAMEOVER
-} GameScreen;
-
-GameScreen currentScreen = TITLE;
-
-mutex mtx;
-
-chrono::duration<double> score;
-
-class Ball
-{
-public:
-    float x, y;
-    float initial_speed, speed_x, speed_y;
-    int radius;
-
-    void Draw()
-    {
-        DrawCircle(x, y, radius, WHITE);
-    }
-
-    void Update()
-    {
-        if (currentScreen == GAMEPLAY)
-        {
-
-            x += speed_x;
-            y += speed_y;
-
-            if (y + radius >= GetScreenHeight() || y - radius <= 0)
-            {
-                speed_y *= -1;
-            }
-            if (x + radius >= GetScreenWidth() || x - radius <= 0)
-            {
-                GameOver();
-            }
-        }
-    }
-
-    void Reset()
-    {
-        // reseting positions
-        x = GetScreenWidth() / 2;
-        y = GetScreenHeight() / 2;
-
-        // reseting speed (ball goes do random direction)
-        int speed_choices[2] = {-1, 1};
-        speed_x = initial_speed * speed_choices[GetRandomValue(0, 1)];
-        speed_y = initial_speed * speed_choices[GetRandomValue(0, 1)];
-    }
-
-    void GameOver()
-    {
-        currentScreen = GAMEOVER;
-    }
-};
-
-class Paddle
-{
-public:
-    float x, y;
-    float width, heigth;
-    float initial_speed, speed;
-    bool wasd = false;
-
-    void Draw()
-    {
-        DrawRectangle(x, y, width, heigth, WHITE);
-    }
-
-    void Update()
-    {
-        if ((wasd && IsKeyDown(KEY_W)) || (!wasd && IsKeyDown(KEY_I)))
-        {
-            y -= speed;
-            this_thread::sleep_for(chrono::milliseconds(5));
-        }
-        else if ((wasd && IsKeyDown(KEY_S)) || (!wasd && IsKeyDown(KEY_K)))
-        {
-            y += speed;
-            this_thread::sleep_for(chrono::milliseconds(5));
-        }
-
-        if (y <= 0)
-        {
-            y = 0;
-        }
-        if (y + heigth >= GetScreenHeight())
-        {
-            y = GetScreenHeight() - heigth;
-        }
-    }
-
-    void Reset()
-    {
-        // reseting positions
-        y = (GetScreenHeight() / 2) - heigth / 2;
-
-        // reseting speeed
-        speed = initial_speed;
-    }
-};
-
-Paddle player1;
-Ball ball;
-Paddle player2;
-
-void update_p1()
+void update_player_in_thread(Paddle *player)
 {
     while (WindowShouldClose() == false)
     {
         mtx.lock();
-        player1.Update();
-        mtx.unlock();
-    }
-}
-
-void update_p2()
-{
-    while (WindowShouldClose() == false)
-    {
-        mtx.lock();
-        player2.Update();
+        (*player).Update();
         mtx.unlock();
     }
 }
 
 int main()
 {
+    Ball ball;
+    Paddle player1;
+    Paddle player2;
+
     ball.radius = 21;
     ball.x = SCREEN_W / 2;
     ball.y = SCREEN_H / 2;
@@ -175,13 +53,14 @@ int main()
 
     SetTargetFPS(60);
 
-    thread thP1(update_p1);
-    thread thP2(update_p2);
+    thread thP1(update_player_in_thread, &player1);
+    thread thP2(update_player_in_thread, &player2);
 
     chrono::time_point<std::chrono::system_clock> start, current;
 
     while (WindowShouldClose() == false)
     {
+        // Logic
         switch (currentScreen)
         {
         case TITLE:
@@ -264,6 +143,7 @@ int main()
             break;
         }
 
+        // Drawing
         BeginDrawing();
         ClearBackground(BLACK);
 

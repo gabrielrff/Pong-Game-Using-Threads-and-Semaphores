@@ -7,11 +7,14 @@ void Paddle::Draw()
 
 void Paddle::Update()
 {
+    // move up
     if ((wasd && IsKeyDown(KEY_W)) || (!wasd && IsKeyDown(KEY_I)))
     {
         y -= speed;
         this_thread::sleep_for(chrono::milliseconds(5));
     }
+
+    // move down
     else if ((wasd && IsKeyDown(KEY_S)) || (!wasd && IsKeyDown(KEY_K)))
     {
         y += speed;

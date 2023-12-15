@@ -192,6 +192,7 @@ int main()
         ball.Draw();
         player1.Draw();
         player2.Draw();
+        DrawText(TextFormat("%f", GetFrameTime()),SCREEN_W/2,SCREEN_H/2,50,WHITE);
         ClearBackground(BLACK);
         DrawLine(SCREEN_W / 2, 0, SCREEN_W / 2, SCREEN_H, WHITE);
         EndDrawing();

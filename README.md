@@ -20,4 +20,4 @@ make
 ```
 
 ## Como funciona?
-Para mais informações sobre as ferramentas e funcionalidades utilizadas e implementadas, leia o manual do jogo: [Manual de instruções]()
+Para mais informações sobre as ferramentas e funcionalidades utilizadas e implementadas, leia o manual do jogo: [Manual de instruções](PongCoOpManual.pdf)
